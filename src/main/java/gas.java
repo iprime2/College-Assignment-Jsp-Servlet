@@ -14,18 +14,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 /**
- * Servlet implementation class RegisterDbServlet
+ * Servlet implementation class gas
  */
-@WebServlet("/RegisterDbServlet")
-public class RegisterDbServlet extends HttpServlet {
+@WebServlet("/gas")
+public class gas extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public RegisterDbServlet() {
+    public gas() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -37,26 +36,37 @@ public class RegisterDbServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 		response.getWriter().append("Served at: ").append(request.getContextPath());
 	}
-	
-	
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		
-        String name = request.getParameter("name");
-        String password = request.getParameter("password");
-        String mobile = request.getParameter("mobile");
+		String name = request.getParameter("name");
         String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String qty = request.getParameter("qty");
+        int intPhone = 0;
+        int intQty = 0;
         
-    	String jdbcURL = "jdbc:mysql://localhost:3306/userregister?useSSL=false";
+        if(name == null || email == null || phone == null || address == null || qty == null) {
+        	request.setAttribute("error", "Field is missing");
+        	request.getRequestDispatcher("/gas.jsp").forward(request, response);
+        }else {
+        	intPhone = Integer.parseInt(phone);
+        	intQty = Integer.parseInt(qty);
+        }
+        
+//        int intPhone = Integer.parseInt(phone);
+//    	int inQty = Integer.parseInt(qty);
+        
+        String jdbcURL = "jdbc:mysql://localhost:3306/userregister?useSSL=false";
     	String jdbcUsername = "root";
     	String jdbcPassword = "sushil0722";
     	String jdbcDriver = "com.mysql.cj.jdbc.Driver";
-    	String INSERT_USERS_SQL = "INSERT INTO user (name, password, email, mobile) VALUES (?, ?, ?, ?)";
-    	String SELECT_USER_BY_NAME = "select name, password, email, mobile from user where name =?";
+    	String INSERT_GAS_SQL = "INSERT INTO gas (name, mobile, address, qty, email) VALUES (?, ?, ?, ?, ?)";
+    	String SELECT_GAS = "select * from gas";
     	
     	Connection connection = null;
     	
@@ -67,34 +77,39 @@ public class RegisterDbServlet extends HttpServlet {
 			Class.forName(jdbcDriver);
 			
 			connection = DriverManager.getConnection(jdbcURL, jdbcUsername, jdbcPassword);
-			PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USERS_SQL);
+			PreparedStatement preparedStatement = connection.prepareStatement(INSERT_GAS_SQL);
 			preparedStatement.setString(1, name);
-			preparedStatement.setString(2, password);
-			preparedStatement.setString(3, email);
-			preparedStatement.setString(4, mobile);
+			preparedStatement.setInt(2, intPhone);
+			preparedStatement.setString(3, address);
+			preparedStatement.setInt(4, intQty);
+			preparedStatement.setString(5, email);
 			System.out.println(preparedStatement);
 			preparedStatement.executeUpdate();
-			PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_USER_BY_NAME);
+			PreparedStatement preparedStatement1 = connection.prepareStatement(SELECT_GAS);
 			preparedStatement1.setString(1, name);
 			ResultSet rs = preparedStatement1.executeQuery();
 
-			out.println("<h1>Registred user details</h1>");
+			out.println("<h1>Successfully Order Registred</h1>");
+			out.println("<h1>Registred order details</h1>");
 			while (rs.next()) {
-//				out.println("<p>Id: " + rs.getString("id") + "</p>");
+				out.println("<p>Id: " + rs.getInt("id") + "</p>");
 				out.println("<p>Name: " + rs.getString("name") + "</p>");
-				out.println("<p>Password: " + rs.getString("password") + "</p>");
-				out.println("<p>Email: " + rs.getString("email") + "</p>");
-				out.println("<p>Mobile No.: " + rs.getString("mobile") + "</p>");
+				out.println("<p>Email.: " + rs.getString("email") + "</p>");
+				out.println("<p>Mobile: " + rs.getString("mobile") + "</p>");
+				out.println("<p>address: " + rs.getString("address") + "</p>");
+				out.println("<p>Qty.: " + rs.getString("qty") + "</p>");
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			request.setAttribute("error", e);
+			request.getRequestDispatcher("/gas.jsp").forward(request, response);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			request.setAttribute("error", e);
+			request.getRequestDispatcher("/gas.jsp").forward(request, response);
 		}
-        
-		doGet(request, response);
 	}
 
 }
